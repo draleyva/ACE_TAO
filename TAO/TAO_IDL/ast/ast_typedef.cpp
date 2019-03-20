@@ -74,6 +74,9 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 
 #include "ace/Log_Msg.h"
 
+// FUZZ: disable check_for_streams_include
+#include "ace/streams.h"
+
 AST_Decl::NodeType const
 AST_Typedef::NT = AST_Decl::NT_typedef;
 
@@ -89,7 +92,8 @@ AST_Typedef::AST_Typedef (AST_Type *bt,
               n),
     AST_Field (AST_Decl::NT_typedef,
                bt,
-               n)
+               n),
+    has_cached_annotations_ (false)
 {
 }
 
@@ -148,10 +152,10 @@ AST_Typedef::owns_base_type (bool val)
 
 // Dump this AST_Typedef node to the ostream o.
 void
-AST_Typedef::dump (ACE_OSTREAM_TYPE&o)
+AST_Typedef::dump (ACE_OSTREAM_TYPE &o)
 {
   this->dump_i (o, "typedef ");
-  this->ref_type_->dump (o);
+  o << *ref_type_;
   this->dump_i (o, " ");
   this->local_name ()->dump (o);
 }
@@ -193,3 +197,25 @@ AST_Typedef::destroy (void)
 }
 
 IMPL_NARROW_FROM_DECL(AST_Typedef)
+
+AST_Annotation_Appls &
+AST_Typedef::annotations ()
+{
+  if (!has_cached_annotations_)
+    {
+      if (base_type ())
+        {
+          cached_annotations_.add (base_type ()->annotations ());
+        }
+
+      /*
+       * Done after so it's easier for later annotations to override
+       * older ones.
+       */
+      cached_annotations_.add (annotation_appls ());
+
+      has_cached_annotations_ = true;
+    }
+
+  return cached_annotations_;
+}

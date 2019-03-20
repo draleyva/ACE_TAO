@@ -73,6 +73,7 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 #include "ast_expression.h"
 #include "ast_param_holder.h"
 #include "ast_visitor.h"
+#include "ast_annotation_appl.h"
 
 #include "utl_identifier.h"
 #include "utl_err.h"
@@ -211,6 +212,14 @@ void
 AST_Sequence::dump (ACE_OSTREAM_TYPE &o)
 {
   this->dump_i (o, "sequence <");
+  AST_Annotation_Appls::iterator i,
+    finished = base_type_annotations ().end ();
+  for (i = base_type_annotations ().begin (); i != finished; ++i)
+    {
+      AST_Annotation_Appl *a = i->get ();
+      a->dump (o);
+      dump_i (o, " ");
+    }
   this->pd_base_type->dump (o);
   this->dump_i (o, ", ");
   this->pd_max_size->dump (o);
@@ -273,3 +282,15 @@ AST_Sequence::destroy (void)
 }
 
 IMPL_NARROW_FROM_DECL(AST_Sequence)
+
+AST_Annotation_Appls &
+AST_Sequence::base_type_annotations ()
+{
+  return base_type_annotations_;
+}
+
+void
+AST_Sequence::base_type_annotations (const AST_Annotation_Appls &annotations)
+{
+  base_type_annotations_ = annotations;
+}

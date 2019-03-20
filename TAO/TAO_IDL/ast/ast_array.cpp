@@ -271,3 +271,15 @@ AST_Array::set_dims (AST_Expression **ds,
 }
 
 IMPL_NARROW_FROM_DECL(AST_Array)
+
+AST_Annotation_Appls &
+AST_Array::base_type_annotations ()
+{
+  return base_type_annotations_;
+}
+
+void
+AST_Array::base_type_annotations (const AST_Annotation_Appls &annotations)
+{
+  base_type_annotations_ = annotations;
+}
